@@ -64,7 +64,7 @@ This week we go from "one test that passes" to "a TestPyPI release that someone 
 | 12 | Production PyPI | Published package |
 
 
-By Friday this week, your package should install for anyone with `pip install -i https://test.pypi.org/simple/ your-package-name`.
+By Friday this week, your package should install for anyone with `pip install your-package-name --extra-index-url https://test.pypi.org/simple/`.
 
 ## A simple module to test {.smaller}
 
@@ -402,7 +402,7 @@ uv publish --publish-url https://test.pypi.org/legacy/
 uv venv /tmp/test-install
 source /tmp/test-install/bin/activate
 
-uv pip install -i https://test.pypi.org/simple/ your-package
+pip install your-package --extra-index-url https://test.pypi.org/simple/
 ```
 
 ---
@@ -459,13 +459,44 @@ uv publish --publish-url https://test.pypi.org/legacy/
 
 ---
 
+## Step 4: Install and verify
+
+```bash
+uv venv /tmp/test-install
+source /tmp/test-install/bin/activate
+
+pip install your-package --extra-index-url https://test.pypi.org/simple/
+```
+
+. . .
+
+### `-i` vs `--extra-index-url`
+
+```bash
+# -i replaces the default index entirely
+pip install your-package -i https://test.pypi.org/simple/
+
+# --extra-index-url adds a second index alongside PyPI
+pip install your-package --extra-index-url https://test.pypi.org/simple/
+```
+
+. . .
+
+With `-i`, pip **only** looks at TestPyPI. If your package depends on `pandas` or `geopandas`, pip cannot find them because they are not on TestPyPI.
+
+. . .
+
+With `--extra-index-url`, pip checks **both** TestPyPI (for your package) **and** PyPI (for everything else). Always prefer `--extra-index-url` when installing from a custom repository.
+
+---
+
 ## Errors you will hit and how to fix them
 
 ::: {.incremental}
 * **The name is already taken.** Rename in `pyproject.toml`, add initials.
 * **File already exists.** Bump `version` (`0.1.0` becomes `0.1.1`).
 * **Invalid or expired token.** Generate a new token.
-* **Could not find a version that satisfies the requirement pandas.** Add `--extra-index-url https://pypi.org/simple/` to the install command.
+* **Could not find a version that satisfies the requirement pandas.** You probably used `-i` instead of `--extra-index-url`. Switch to `--extra-index-url` so pip also checks the real PyPI for dependencies.
 :::
 
 . . .
